@@ -2,7 +2,7 @@
 
 <head>
     <script src="https://unpkg.com/video-stream-merger/dist/video-stream-merger.js"></script>
-    <script src="https://unpkg.com/@api.video/media-recorder"></script>
+    <script src="index.js"></script>
     <style>
         #container {
             display: flex;
@@ -44,68 +44,71 @@
         const mp4 = document.createElement("video");
         let stream, recorder;
 
-        mp4.src = "source.mp4";
-        mp4Stream = mp4.captureStream();
+        mp4.src = "source.mov";
 
-        // get the webcam stream
-        navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: true
-        }).then((webcamStream) => {
+        mp4.addEventListener('loadeddata', function () {
+            mp4Stream = mp4.captureStream();
 
-            // get the screen stream
-            mp4.play();
-            
-            const mp4StreamSettings = mp4Stream.getTracks()[0].getSettings();
+            // get the webcam stream
+            navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: true
+            }).then((webcamStream) => {
 
-            var merger = new VideoStreamMerger({
-                width: 1920,
-                height: 1080
-            })
+                // get the screen stream
+                mp4.play();
 
-            // Add the screen capture. Position it to fill the whole stream (the default)
-            merger.addStream(mp4Stream, {
-                x: 0, // position of the topleft corner
-                y: 0,
-                width: merger.width,
-                height: merger.height,
-                mute: true // we don't want sound from the screen (if there is any)
-            })
+                const mp4StreamSettings = mp4Stream.getTracks()[0].getSettings();
 
-            // Add the webcam stream. Position it on the bottom left and resize it to 100x100.
-            merger.addStream(webcamStream, {
-                x: 20,
-                y: merger.height - 220,
-                width: 200,
-                height: 200,
-                mute: false
+                var merger = new VideoStreamMerger({
+                    width: 1920,
+                    height: 1080
+                })
+
+                // Add the screen capture. Position it to fill the whole stream (the default)
+                merger.addStream(mp4Stream, {
+                    x: 0, // position of the topleft corner
+                    y: 0,
+                    width: merger.width,
+                    height: merger.height,
+                    mute: true // we don't want sound from the screen (if there is any)
+                })
+
+                // Add the webcam stream. Position it on the bottom left and resize it to 100x100.
+                merger.addStream(webcamStream, {
+                    x: 20,
+                    y: merger.height - 220,
+                    width: 200,
+                    height: 200,
+                    mute: false
+                });
+
+                merger.start();
+                stream = merger.result;
+                video.srcObject = stream;
+                video.play();
+                startButton.disabled = false;
             });
 
-            merger.start();
-            stream = merger.result;
-            video.srcObject = stream;
-            video.play();
-            startButton.disabled = false;
-        });
 
 
+            document.getElementById("start").addEventListener("click", () => {
+                recorder = new ApiVideoMediaRecorder(stream, {
+                    uploadToken: "to7NiXMblVKM4FySYVxeHA1V"
+                });
 
-        document.getElementById("start").addEventListener("click", () => {
-            recorder = new ApiVideoMediaRecorder(stream, {
-                uploadToken: "to7NiXMblVKM4FySYVxeHA1V"
+                recorder.start();
+
+                startButton.disabled = true;
+                stopButton.disabled = false;
             });
 
-            recorder.start();
+            document.getElementById("stop").addEventListener("click", () => {
+                startButton.disabled = false;
+                stopButton.disabled = true;
 
-            startButton.disabled = true;
-            stopButton.disabled = false;
-        });
-
-        document.getElementById("stop").addEventListener("click", () => {
-            startButton.disabled = false;
-            stopButton.disabled = true;
-
-            recorder.stop().then(v => videoLink.innerHTML = v.assets.player);
+                recorder.stop().then(v => videoLink.innerHTML = v.assets.player);
+            });
         });
     </script>
 </body>
