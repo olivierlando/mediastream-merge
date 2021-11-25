@@ -1,0 +1,64 @@
+<html>
+
+<head>
+    <script src="https://unpkg.com/video-stream-merger/dist/video-stream-merger.js"></script>
+    <script src="https://unpkg.com/@api.video/media-recorder@1.0.1/dist/index.js"></script>
+    <style>
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #video {
+            width: 640;
+            height: 480;
+            border: 1px solid gray;
+        }
+
+        #container div {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div>
+            <video playsinline="true" id="video"></video>
+        </div>
+        <div>
+            <button id="start" disabled>start recording</button>
+            <button id="stop" disabled>stop recording</button>
+        </div>
+        <div>
+            <p>Video link: <span id="video-link"><i>will be displayed when the recording is finished</i></span></p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.querySelector('#video');
+        const startButton = document.getElementById("start");
+        const stopButton = document.getElementById("stop");
+        const videoLink = document.getElementById("video-link");
+        const mp4 = document.createElement("video");
+        let stream, recorder;
+
+        // get the webcam stream
+        navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true
+        }).then((webcamStream) => {
+
+
+            video.srcObject = webcamStream;
+            video.play();
+            startButton.disabled = false;
+        });
+
+
+        
+    </script>
+</body>
+
+</html>
